@@ -11,12 +11,9 @@ parser = argparse.ArgumentParser(
     description='input a ref sequence, specicy length of kmer and number of seqs you want. Returns randomly extracted kmers in multifasta format'
     ' \n', formatter_class=RawTextHelpFormatter)
 
-
-### Upload inputs (bedmethyl file from modkit and reference genome)
 parser.add_argument('-ref', default = None, help='reference genome in fasta or multi fasta format, if multi, first seq will be used to extract kmers')
 parser.add_argument('-k', type=int, help='length of kmer')
 parser.add_argument('-n', type=int, help='number of random kmers to generate')
-
 args = parser.parse_args()
 
 #import reference genome and make all NTs uppercase

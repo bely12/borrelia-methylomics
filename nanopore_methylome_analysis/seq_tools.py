@@ -1,7 +1,4 @@
-#TO Do 
-#for get_consensus function, make row selection for fetching matrix better 
-#can probably make random_seq and custom_random_seq into one function
-
+### packages needed
 import pandas as pd
 import operator
 import heapq

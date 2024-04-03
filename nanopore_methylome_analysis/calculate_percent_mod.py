@@ -21,7 +21,7 @@ parser.add_argument('-motif_file', default=None, help='list of seqs from txt fil
 parser.add_argument('-mod_pos', type=int, help='position of predicted mod base in motif')
 parser.add_argument('-mod_call_thresh', type=float, default=50.0, help='threshold for calling a position modified in bed file')
 parser.add_argument('-min_cov', type=int, default=10, help='mininum position coverage to filter for')
-parser.add_argument('-p', type=float, help='expected probability for binomial distribution test')
+parser.add_argument('-p', type=float, default=None, help='expected probability for binomial distribution test')
 
 args = parser.parse_args()
 
