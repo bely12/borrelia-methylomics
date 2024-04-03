@@ -1,3 +1,4 @@
+# its simple - look at, sort, get info from bedmethyl file
 ########## packages 
 import pandas as pd
 import argparse
