@@ -135,6 +135,18 @@ def get_mod_frequncy(motif_list, bed_dict, mod_pos, mod_call_thresh, min_cov = 1
       results.append({'motif': motif, 'occurences': found, 'modified': modified, 'percent_mod': 0})
   return results
 
+def mod_mapper(motif_list, bed_dict, mod_pos, mod_call_thresh = 50.0, min_cov = 10):
+  results = []
+  for motif in motif_list:
+    start = 6 - mod_pos
+    end = start + len(motif)
+    for i in range(len(bed_dict)):
+      if re.search(motif, bed_dict[i]['kmer'][start:end]) != None and bed_dict[i]['cov'] >= min_cov:
+        if bed_dict[i]['mod_freq'] >= mod_call_thresh:
+          #print(motif,'\t',bed_dict[i]['chromosome'],'\t',bed_dict[i]['start'],'\t',bed_dict[i]['strand'])
+          results.append({'motif': motif, 'plasmid_id': bed_dict[i]['chromosome'], 'position': bed_dict[i]['start'], 'strand': bed_dict[i]['strand']})
+  return results
+
 def base_composition(seq):
   A = seq.count('a')
   T = seq.count('t')
