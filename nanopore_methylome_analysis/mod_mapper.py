@@ -3,12 +3,14 @@ import Bio
 from Bio import SeqIO
 import pandas as pd
 import seq_tools
+import mod_tools
 import argparse
 from argparse import RawTextHelpFormatter
 
 ##### ARGUMENTS #####
 parser = argparse.ArgumentParser(
-    description='gives coordinates of all likely modified adenines within identified RM target sites'
+    description='gives coordinates of all likely modified adenines within identified RM target sites,\n'
+    'target sites that are not modified, and off target sites predicted to be methylated'
     ' \n', formatter_class=RawTextHelpFormatter)
 
 
@@ -19,6 +21,7 @@ parser.add_argument('-motif_file', default=None, help='list of seqs from txt fil
 parser.add_argument('-mod_pos', type=int, help='position of predicted mod base in motif')
 parser.add_argument('-mod_call_thresh', type=float, default=50.0, help='threshold for calling a position modified in bed file')
 parser.add_argument('-min_cov', type=int, default=10, help='mininum position coverage to filter for')
+parser.add_argument('-target_mods_only', const=True, nargs='?', help='if you only want output mapping target positions predited to be modified')
 args = parser.parse_args()
 
 ##### EXECUTION #####
@@ -56,21 +59,28 @@ for i in range(len(recs)):
 #remove errant kmers (don't have potential 6mA in correct position)
 bed3 = [i for i in bed2 if not ( (len(i['kmer']) != 11) or (i['kmer'][5] != 'A') )]
 
-#if input is a single motif with the -motif arg 
+#if input is a single motif with the -motif and -mod_pos args
 if args.motif != None:
   motif_list = seq_tools.ambig_seq(args.motif)
+  results = mod_tools.mod_mapper_single(motif_list, bed3, mod_pos = args.mod_pos, mod_call_thresh = args.mod_call_thresh, min_cov = args.min_cov)
 
-#if input is a txt file containing a list of motifs, 1 per line (no ambiguous NT's) *use with neg control seqs
+
+
+#if input is a txt file containing a column with motifs and matching column with mod_pos
 if args.motif_file != None:
-  with open(args.motif_file, 'r') as motifs:
-    motif_list = motifs.readlines()
-  for i in range(len(motif_list)):
-    motif_list[i] = motif_list[i].replace("\n", "")
-
-#get coordinates of modified adenines 
-results = seq_tools.mod_mapper(motif_list, bed3, mod_pos = args.mod_pos, mod_call_thresh = args.mod_call_thresh, min_cov = args.min_cov)
+  motif_list = pd.read_table(args.motif_file, header=None)
+  motif_list.columns = ['motif', 'mod_pos']
+  motif_list = motif_list.to_dict('records')
+  motif_list = mod_tools.ambig_seq_mod(motif_list)
+  results = mod_tools.mod_mapper(motif_list, bed3, mod_call_thresh = args.mod_call_thresh, min_cov = args.min_cov)
 
 ##### OUTPUT #####
-#print results
-for i in range(len(results)):
-  print(results[i]['motif'],'\t',results[i]['plasmid_id'],'\t',results[i]['position'],'\t',results[i]['strand'])
+### for only modified positions ###
+if args.target_mods_only != None: 
+  for i in range(len(results)):
+    if results[i]['motif'] != 'off_target': #and results[i]['status'] == 'modified':  #turned off so it will give modified and unmodified for target sites
+      print(results[i]['motif'],'\t',results[i]['plasmid_id'],'\t',results[i]['position'],'\t',results[i]['strand'],'\t',results[i]['status'])
+
+else: 
+  for i in range(len(results)):
+    print(results[i]['motif'],'\t',results[i]['plasmid_id'],'\t',results[i]['position'],'\t',results[i]['strand'],'\t',results[i]['status'])

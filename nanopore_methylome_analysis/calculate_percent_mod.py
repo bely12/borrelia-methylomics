@@ -4,6 +4,7 @@ from Bio import SeqIO
 import pandas as pd
 import numpy as np
 import seq_tools
+import mod_tools
 from scipy.stats import binomtest
 import argparse
 from argparse import RawTextHelpFormatter
@@ -73,7 +74,7 @@ if args.motif_file != None:
     motif_list[i] = motif_list[i].replace("\n", "")
 
 #get percent modified for each motif 
-results = seq_tools.get_mod_frequncy(motif_list, bed3, mod_pos = args.mod_pos, mod_call_thresh = args.mod_call_thresh, min_cov = args.min_cov)
+results = mod_tools.get_mod_frequncy(motif_list, bed3, mod_pos = args.mod_pos, mod_call_thresh = args.mod_call_thresh, min_cov = args.min_cov)
 
 
 ### summarize individual results
