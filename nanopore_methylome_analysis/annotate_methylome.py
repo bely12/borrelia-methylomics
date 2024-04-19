@@ -101,7 +101,7 @@ for i in range(len(regions)):
   id = regions[i]['element_id']
   x = list(filter(lambda d: d['plasmid_id'] in id, mods))
   
-  #counters for mods (target mod, non-mod, and off target mods)
+  #counters
   mod = 0
   non_mod = 0
   off_target_mod = 0 
@@ -125,7 +125,57 @@ for i in range(len(regions)):
 # convert results into pandas df
 annotated_mods = pd.DataFrame.from_dict(results)
 annotated_mods['feature_len'] = annotated_mods['end'] - annotated_mods['start']
-annotated_mods['mod_rate'] = annotated_mods['target_mod'] / annotated_mods['feature_len']
-annotated_mods = annotated_mods[['element_id', 'len', 'gene_id', 'protein_id', 'start', 'end', 'feature_len', 'strand', 'target_mod', 'target_no_mod', 'off_target','mod_rate']]
-# save to tsv file
-annotated_mods.to_csv(args.out+'_methylome_annotations.tsv', sep='\t', index=False, header=True)
+annotated_mods['mod_rate'] = round((annotated_mods['target_mod'] / annotated_mods['feature_len']) * 1000, 2)
+annotated_mods['unmodified_rate'] = round((annotated_mods['target_no_mod'] / annotated_mods['feature_len']) * 1000, 2)
+annotated_mods = annotated_mods[['element_id', 'len', 'gene_id', 'protein_id', 'start', 'end', 'feature_len', 'strand', 'target_mod','mod_rate','target_no_mod','unmodified_rate','off_target']]
+
+#write output file
+annotated_mods.to_csv(args.out+'_mod_annotations.tsv', sep='\t', index=False, header=True)
+
+### summary results ###
+df = annotated_mods
+
+summary = []
+for id in df.element_id.unique():
+
+  #all mods
+  filtered_df = df[df['element_id'] == id]
+  total_mods = filtered_df['target_mod'].sum()
+  total_len = int(filtered_df['len'].mean())
+  
+  #off target mods
+  off_target_mods = filtered_df['off_target'].sum()
+  
+  #target sites not modified 
+  target_no_mod = filtered_df['target_no_mod'].sum()
+  
+  #cds target mods
+  filtered_df = df[ (df['element_id'] == id) & (df['gene_id'] != 'intergenic') ]
+  cds_mods = filtered_df['target_mod'].sum()
+  cds_len = filtered_df['feature_len'].sum()
+
+  #non-coding target mods
+  filtered_df = df[ (df['element_id'] == id) & (df['gene_id'] == 'intergenic') ]
+  intergenic_mods = filtered_df['target_mod'].sum()
+  intergenic_len = filtered_df['feature_len'].sum()
+
+  
+  #make dictionary with data 
+  summary.append({'id': id,
+                 'len': total_len,
+                  'total_mods': total_mods,
+                  'total_rate': round(total_mods/total_len*1000,3),
+                 'cds_mods': cds_mods,
+                 'cds_rate': round(cds_mods/cds_len*1000,3),
+                 'intergenic_mods': intergenic_mods,
+                  'intergenic_rate': round(intergenic_mods/intergenic_len*1000,3),
+                  'off_target_mods': off_target_mods,
+                  'off_target_rate': round(off_target_mods/total_len*1000,3),
+                  'unmodified_targets': target_no_mod,
+                  'unmodified_target_rate': round(target_no_mod/total_len*1000,3)})
+
+#convert to df
+summary_df = pd.DataFrame(data=summary)
+
+#write output file
+summary_df.to_csv(args.out+'_mod_summary.tsv', sep='\t', index=False, header=True)
