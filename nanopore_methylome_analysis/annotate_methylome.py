@@ -124,7 +124,7 @@ for i in range(len(regions)):
 
 # convert results into pandas df
 annotated_mods = pd.DataFrame.from_dict(results)
-annotated_mods['feature_len'] = annotated_mods['end'] - annotated_mods['start']
+annotated_mods['feature_len'] = (annotated_mods['end'] - annotated_mods['start']) +1
 annotated_mods['mod_rate'] = round((annotated_mods['target_mod'] / annotated_mods['feature_len']) * 1000, 2)
 annotated_mods['unmodified_rate'] = round((annotated_mods['target_no_mod'] / annotated_mods['feature_len']) * 1000, 2)
 annotated_mods = annotated_mods[['element_id', 'len', 'gene_id', 'protein_id', 'start', 'end', 'feature_len', 'strand', 'target_mod','mod_rate','target_no_mod','unmodified_rate','off_target']]
