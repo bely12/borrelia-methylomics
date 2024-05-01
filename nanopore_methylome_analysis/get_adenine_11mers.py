@@ -24,14 +24,14 @@ parser.add_argument('-bed', help='tsv bed file with mod calls and kmers. kmers m
 parser.add_argument('-ref', default = None, help='reference genome in fasta or multi fasta format, first seq will be used to generate control seqs')
 
 ### specify window size for kmers
-parser.add_argument('len', default=11, type=int, help='size of kmer you wish to extract')
+parser.add_argument('-len', default=11, type=int, help='size of kmer you wish to extract')
 
 ### filtering for minimum sequencing depth and criteria for calling a position 6mA
 parser.add_argument('-depth', default=10, type=int, help='minimum sequencing depth to use, inclusive')
 parser.add_argument('-mod_threshold', default=50.0, type=float, help='percentage of reads that need to be predicted as modified for that position to call position 6mA')
 
 ###
-parser.add_argument('-controls', const=True, nargs='?')
+parser.add_argument('-controls', const=True, nargs='?', help='outputs a set of control sequences that are generated ')
 parser.add_argument('-out', help='prefix for output fasta file')
 
 
@@ -96,10 +96,9 @@ for seq in fixed_kmers:
 
 if args.controls == True:
   #create multi fasta for control seeks
-  window = 11 #length of control seek
   z = 1
   for i in range(k): 
-    position = random.randint(1, len(ref[0].seq)-11)
-    seq = ref[0].seq[position:position+window]
+    position = random.randint(1, len(ref[0].seq)-args.len)
+    seq = ref[0].seq[position:position+args.len]
     print('>control_', z,'\n', seq, sep='', file = open(args.out+'_control_seqs.fasta', "a"))
     z += 1
