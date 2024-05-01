@@ -2,6 +2,8 @@
 import Bio
 from Bio import SeqIO
 import pandas as pd
+import random
+import math
 import seq_tools
 import argparse
 from argparse import RawTextHelpFormatter
@@ -21,9 +23,17 @@ parser.add_argument('-unmodified', const=True, nargs='?')
 parser.add_argument('-bed', help='tsv bed file with mod calls and kmers. kmers must be in the 3rd column of the table, no header\n')
 parser.add_argument('-ref', default = None, help='reference genome in fasta or multi fasta format, first seq will be used to generate control seqs')
 
+### specify window size for kmers
+parser.add_argument('len', default=11, type=int, help='size of kmer you wish to extract')
+
 ### filtering for minimum sequencing depth and criteria for calling a position 6mA
 parser.add_argument('-depth', default=10, type=int, help='minimum sequencing depth to use, inclusive')
 parser.add_argument('-mod_threshold', default=50.0, type=float, help='percentage of reads that need to be predicted as modified for that position to call position 6mA')
+
+###
+parser.add_argument('-controls', const=True, nargs='?')
+parser.add_argument('-out', help='prefix for output fasta file')
+
 
 args = parser.parse_args()
 
@@ -58,6 +68,8 @@ if args.unmodified == True:
 
 # extract 11mers for every adenine 
 kmers = []
+down = math.floor(args.len/2)
+up = math.ceil(args.len/2)
 for i in range(len(recs)):
   plasmid = recs[i]['chromosome']
   position = recs[i]['start']
@@ -65,17 +77,29 @@ for i in range(len(recs)):
     if ref[j].id == plasmid:
       if (position < 100) or (position > len(ref[j].seq)-100): #to not select from extreme ends of seqs 
         break
-      seq = str(ref[j].seq[position-5 : position+6]) #extract 11mer with A in middle
+      #seq = str(ref[j].seq[position-5 : position+6]) #extract 11mer with A in middle
+      seq = str(ref[j].seq[position-down : position+up]) #for any size kmer
       if recs[i]['strand'] == '-':
         seq = seq_tools.reverse_complement(seq)
       kmers.append(seq)
       break
 
 # remove errant kmers that do not have A in middle position
-fixed_kmers = [i for i in kmers if not (i[5] != 'A')]
+#fixed_kmers = [i for i in kmers if not (i[5] != 'A')]
+fixed_kmers = [i for i in kmers if not (i[down] != 'A')] #for any size kmer
 
 # print results in fasta format
 k = 1
 for seq in fixed_kmers:
-  print('>motif_',k,'\n',seq, sep='')
+  print('>seq_',k,'\n',seq, sep='', file = open(args.out+'_positive_seqs.fasta', "a"))
   k += 1
+
+if args.controls == True:
+  #create multi fasta for control seeks
+  window = 11 #length of control seek
+  z = 1
+  for i in range(k): 
+    position = random.randint(1, len(ref[0].seq)-11)
+    seq = ref[0].seq[position:position+window]
+    print('>control_', z,'\n', seq, sep='', file = open(args.out+'_control_seqs.fasta', "a"))
+    z += 1

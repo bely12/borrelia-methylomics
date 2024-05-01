@@ -25,7 +25,7 @@ for i in range(len(ref)):
 window = args.k #length of control seek
 z = 1
 for i in range(args.n): 
-  position = random.randint(200, len(ref[0].seq)-200)
+  position = random.randint(1, len(ref[0].seq)-11)
   seq = ref[0].seq[position:position+window]
   print('>seq_', z,'\n', seq, sep='')
   z += 1
