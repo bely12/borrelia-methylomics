@@ -51,6 +51,7 @@ def reverse_complement(s):
 
 
 def draw_a_syn_codon(codon):
+    cd_table = pct.get_codons_table(139)
     aa = codon.translate() # aa residue as a seqRecord
     syn_codons = cd_table[str(aa.seq)]
     probs = list(syn_codons.values())
@@ -63,20 +64,21 @@ def draw_a_syn_codon(codon):
 
 
 def syn_codon_shuffle(fasta_file, n):
-    output = [] #added this much later, doesn't make sense that it would work without it? 
-    for seq_rec in SeqIO.parse(fasta_file, 'fasta'):
-        aa_seq = seq_rec.translate()
-        #if re.match(r'\*', str(aa_seq.seq)):
-            #print(seq_rec.id, ": internal stop found. Skip")
-            #continue
-        for i in range(n):
-            new_str = ''
-            for j in range(0, len(seq_rec)-2, 3):
-                codon = seq_rec[j:(j+3)]
-                new_str += draw_a_syn_codon(codon)
-            output.append({'id': seq_rec.id, 'seq': new_str})
-        #for item in output:
-            #print('>',item['id'],'\n',item['seq'],sep='')
+  output = []
+  for seq_rec in SeqIO.parse(fasta_file, 'fasta'):
+      aa_seq = seq_rec.translate()
+      #if re.match(r'\*', str(aa_seq.seq)):
+          #print(seq_rec.id, ": internal stop found. Skip")
+          #continue
+      k = 1
+      for i in range(n):
+          new_str = ''
+          for j in range(0, len(seq_rec)-2, 3):
+              codon = seq_rec[j:(j+3)]
+              new_str += draw_a_syn_codon(codon)
+          output.append({'id': seq_rec.id, 'seq': new_str, 'num':k})
+          k+=1
+  return output
 
 
 def random_seq(seq_len):
@@ -113,18 +115,37 @@ def seq_shuffler(file, n):
       output.append({'id': seqList[i].id, 'seq': seq})
       #k = k+1
 
+def motif_counter(motif_list, file):
+  #get all possible seqs from each motif with ambiguos nt's 
+  ambig = bdi.ambiguous_dna_values
+  ambig.update({'N': 'ACGT'})
+  motif_dict = []
+  for item in motif_list:
+    all_seqs = []
+    for i in product(*[ambig[j] for j in item]):
+      all_seqs.append("".join(i))
+    motif_dict.append({'consensus': item, 'set': all_seqs})
 
-def motif_counter(motif, file):
-    seqList = list(SeqIO.parse(file, "fasta"))
-    for i in range(0, len(seqList)):
-        cds = str(seqList[i].seq) #converting the seq to a string for use for regex
-        rvc = str(seqList[i].seq.reverse_complement()) #making a string of the reverse complement of the seq
-        foundCDS = re.findall(pattern = r'(?=(' + motif + '))', string = cds, flags = re.IGNORECASE) #searchng for a specified motif
-        foundRVC = re.findall(pattern = r'(?=(' + motif + '))', string = rvc, flags = re.IGNORECASE) #searchng for a specified motif
-        output.append({'id': seqList[i].id, 'seq_length': len(seqList[i].seq), 'motif': motif, 
-                   'fwd_match':len(foundCDS), 
-                   'rev_match': len(foundRVC),
-                  'total_match': len(foundCDS) + len(foundRVC)})
+  seqList = list(SeqIO.parse(file, "fasta"))
+  motif_counts = []
+  
+  for i in range(len(seqList)):
+    cds = str(seqList[i].seq) #converting the seq to a string for use for regex
+    rvc = str(seqList[i].seq.reverse_complement()) #making a string of the reverse complement of the seq
+    
+    for motif_set in motif_dict:
+      for k in motif_set['set']:
+        foundCDS = re.findall(pattern = r'(?=(' + k + '))', string = cds, flags = re.IGNORECASE) #searchng for a specified motif
+        foundRVC = re.findall(pattern = r'(?=(' + k + '))', string = rvc, flags = re.IGNORECASE) #searchng for a specified motif
+
+        motif_counts.append({'consensus': motif_set['consensus'],
+                             'motif': k,
+                             'id': seqList[i].id,
+                             'seq_length': len(seqList[i].seq),
+                             'fwd_match':len(foundCDS),
+                             'rev_match': len(foundRVC),
+                             'total_match': len(foundCDS) + len(foundRVC)})
+  return motif_counts
 
 
 def motif_mapper(motif, file):
