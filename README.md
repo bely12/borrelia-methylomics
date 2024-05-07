@@ -2,36 +2,22 @@ This repository contains a workflow and tools for analyzing 6mA modifications an
 
 Brief overview of workflow starting with the bed file produced by ONT's ModKit:
 
-**Motif Discovery**
+# Motif Discovery 
 
-I. Get kmers with predicted methylated adenine in center 
-  Program: get_adenine_kmers.py
-  Required Inputs: 
-    bed file
-    ref genome
-  Output: 
-    windows of specified size with center adenine, fasta format
-    option for control kmers to use with streme 
+I. get_adenine_kmers.py
+  Retrieves the nucleotides surrounding potential modified adenines in a specified window size.
+  Outputs adenine centered kmers in fasta format, along with a control set of sequences to be used to find enriched patterns 
 
-II. Look for enriched motifs in adenine kmers
-  Program: Streme ()
-  Required Inputs:
-    Fasta of potentially modified adenine kmers
-    Fasta of control seqs
+II. Streme
+  Input the positive adenine kmers and controls seqs to detect candidate methylated target motifs
 
-III. Check candidate motifs for percent modified in the genome
-  Programs: calculate_percent_mod.py; percent_mod_binomial_dist.py
-  Required inputs:
-    motif or list of motifs
-    bed file
-    ref genome
-  Output:
-    percentage of motif modified throughout genome
-    binomial test statistics
+III. calculate_percent_mod.py; percent_mod_binomial_dist.py
+  Calculate what percentage of target sites are modified in your ONT data.
+  Can perform a binomial distribuition test if necessary
 
 -------------------------------------------------------
 
-**Methylome Profile**
+# Methylome Profile
 
 I. Map modifications to the genome
   Program: mod_mapper.py
@@ -49,7 +35,7 @@ III. Methylation sliding window
 
 -------------------------------------------------------
 
-**Target site enrichment/adoidance analysis**
+# Target site enrichment/avoidance analysis
 
 I. Synonomous codon shuffling
 II. motif mapper
