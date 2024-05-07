@@ -31,7 +31,7 @@ III. Check candidate motifs for percent modified in the genome
 
 -------------------------------------------------------
 
-Methylome Profile
+**Methylome Profile**
 
 I. Map modifications to the genome
   Program: mod_mapper.py
@@ -49,7 +49,7 @@ III. Methylation sliding window
 
 -------------------------------------------------------
 
-Target site enrichment/adoidance analysis
+**Target site enrichment/adoidance analysis**
 
 I. Synonomous codon shuffling
 II. motif mapper
