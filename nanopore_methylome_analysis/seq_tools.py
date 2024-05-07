@@ -148,15 +148,30 @@ def motif_counter(motif_list, file):
   return motif_counts
 
 
-def motif_mapper(motif, file):
-    seqList = list(SeqIO.parse(file, "fasta"))
-    for i in range(0, len(seqList)):
-      plus_seq = str(seqList[i].seq)
-      minus_seq = str(seqList[i].seq.reverse_complement()) 
-      for matches in re.finditer(pattern = r'(?=(' + motif + '))', string = plus_seq, flags = re.IGNORECASE): 
-        output.append({'id': seqList[i].id, 'seq_length': len(seqList[i].seq), 'motif': motif, 'strand': 'plus','pos_start': matches.start()})
-      for matches in re.finditer(pattern = r'(?=(' + motif + '))', string = minus_seq, flags = re.IGNORECASE): 
-        output.append({'id': seqList[i].id, 'seq_length': len(seqList[i].seq), 'motif': motif, 'strand': 'minus','pos_start': matches.start()})
+def motif_mapper(motif_list, fasta):
+  #get all possible seqs from each motif with ambiguos nt's
+  ambig = bdi.ambiguous_dna_values
+  ambig.update({'N': 'ACGT'})
+  motif_dict = []
+  for item in motif_list:
+    all_seqs = []
+    for i in product(*[ambig[j] for j in item]):
+      all_seqs.append("".join(i))
+    motif_dict.append({'consensus': item, 'set': all_seqs})
+
+  map = []
+  seqList = list(SeqIO.parse(fasta, "fasta"))
+  for i in range(0, len(seqList)):
+    plus_seq = str(seqList[i].seq)
+    minus_seq = str(seqList[i].seq.reverse_complement())
+    
+    for motif_set in motif_dict:
+      for k in motif_set['set']: 
+        for matches in re.finditer(pattern = r'(?=(' + k + '))', string = plus_seq, flags = re.IGNORECASE): 
+          map.append({'id': seqList[i].id, 'motif': motif_set['consensus'],'seq': k, 'strand': 'plus','pos': matches.start()})
+        for matches in re.finditer(pattern = r'(?=(' + k + '))', string = minus_seq, flags = re.IGNORECASE): 
+          map.append({'id': seqList[i].id,'motif': motif_set['consensus'], 'seq': k, 'strand': 'minus','pos': matches.start()})
+  return map
 
 
 def seq_replace(fasta_file_name, remove_char, replace_char, new_file_name):
