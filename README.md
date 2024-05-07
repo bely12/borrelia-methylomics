@@ -2,7 +2,7 @@ This repository contains a workflow and tools for analyzing 6mA modifications an
 
 Brief overview of workflow starting with the bed file produced by ONT's ModKit:
 
-Motif Discovery
+**Motif Discovery**
 
 I. Get kmers with predicted methylated adenine in center 
   Program: get_adenine_kmers.py
