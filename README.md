@@ -3,6 +3,7 @@ This repository contains a workflow and tools for analyzing 6mA modifications an
 Brief overview of workflow starting with the bed file produced by ONT's ModKit:
 
 Motif Discovery
+
 I. Get kmers with predicted methylated adenine in center 
   Program: get_adenine_kmers.py
   Required Inputs: 
@@ -31,6 +32,7 @@ III. Check candidate motifs for percent modified in the genome
 -------------------------------------------------------
 
 Methylome Profile
+
 I. Map modifications to the genome
   Program: mod_mapper.py
   Inputs: 
@@ -47,7 +49,8 @@ III. Methylation sliding window
 
 -------------------------------------------------------
 
-Target site enrichment/adoidance analysis 
+Target site enrichment/adoidance analysis
+
 I. Synonomous codon shuffling
 II. motif mapper
 III. Motif enrichment avoidance analysis
