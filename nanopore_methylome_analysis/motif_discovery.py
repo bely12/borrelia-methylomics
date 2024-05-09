@@ -5,24 +5,25 @@ import pandas as pd
 import numpy as np
 import seq_tools
 import mod_tools
-from scipy.stats import binomtest
 import argparse
 from argparse import RawTextHelpFormatter
 
-########## ARGUMENTS
+### ARGUMENTS ###
 parser = argparse.ArgumentParser(
     description='calculates what percentage of a specified motif is modified in the genome'
     ' \n', formatter_class=RawTextHelpFormatter)
 
+def list_of_ints(arg):
+    return list(map(int, arg.split(',')))
 
 parser.add_argument('-bed', help='tsv bed file with mod calls and kmers. kmers must be in the 3rd column of the table, no header\n')
 parser.add_argument('-ref', default = None, help='reference genome in fasta or multi fasta format, first seq will be used to generate control seqs')
-parser.add_argument('-motif', default=None, help='motif of interst')
-parser.add_argument('-motif_file', default=None, help='list of seqs from txt file, one seq per line')
-parser.add_argument('-mod_pos', type=int, help='position of predicted mod base in motif')
+parser.add_argument('-candidates', help='mutli fasta file with candidate kmers centered on mod adenine')
+parser.add_argument('-mod_pos_index', help='index position of mod adenine in candidate seqs', type=int)
 parser.add_argument('-mod_call_thresh', type=float, default=50.0, help='threshold for calling a position modified in bed file')
 parser.add_argument('-min_cov', type=int, default=10, help='mininum position coverage to filter for')
-
+parser.add_argument('-target_lengths', help='list containing the lengths of kmers to test to find targets', type=list_of_ints)
+parser.add_argument('-n_targets', type=int, help='number of potential targets to record based on top counts for each target length tested', default=15)
 args = parser.parse_args()
 
 
@@ -60,40 +61,26 @@ for i in range(len(recs)):
 #remove errant kmers (don't have potential 6mA in correct position)
 bed3 = [i for i in bed2 if not ( (len(i['kmer']) != 11) or (i['kmer'][5] != 'A') )]
 
-#generate list of motif possibilities, find all occurances, and calculate percent methylated for each
-#if input is a single motif with the --motif arg 
-if args.motif != None:
-  motif_list = seq_tools.ambig_seq(args.motif)
-
-#if input is a txt file containing a list of motifs, 1 per line (no ambiguous NT's) *use with neg control seqs
-if args.motif_file != None:
-  with open(args.motif_file, 'r') as motifs:
-    motif_list = motifs.readlines()
-  for i in range(len(motif_list)):
-    motif_list[i] = motif_list[i].replace("\n", "")
-
-#get percent modified for each motif 
-results = mod_tools.get_mod_frequency(motif_list, bed3, mod_pos = args.mod_pos, mod_call_thresh = args.mod_call_thresh, min_cov = args.min_cov)
+### get most common kmers in candidate seqs ###
+#load candidate motifs (output from get_adenine_kmers.py)
+seqList = list(SeqIO.parse(args.candidates, "fasta"))
+#find potential target motifs
+test_motifs = mod_tools.top_kmers(seqList, args.mod_pos_index, args.target_lengths, args.n_targets)
 
 
-### summarize individual results
+### caclculate percent modified for the most common kmers within candidate seqs ###
 #set column name for results table 
 print('motif','\t','occurences','\t','mod','\t','percent')
 
-#loop through results to perform statistical test and print data
-for i in range(len(results)):
-  print(results[i]['motif'],'\t',
-            results[i]['occurences'],'\t',
-            results[i]['modified'],'\t',
-            results[i]['percent_mod'])
-
-### summarize total results
-#binomial sampling test
-total_occurences = sum(item.get('occurences') for item in results)
-total_modified = sum(item.get('modified') for item in results)
-
-#print total results info 
-print('\n')
-print('Total percent modfied for all motifs = ',
-      round((total_modified / total_occurences) * 100, 2))
-
+#calculate
+for sets in test_motifs:
+  for i in range(len(sets)):
+    motif_list = [sets[i]['seq']]
+    mod_pos = sets[i]['mod_pos']
+    results = mod_tools.get_mod_frequency(motif_list, bed3, mod_pos = mod_pos, mod_call_thresh = args.mod_call_thresh, min_cov = args.min_cov)
+    for i in range(len(results)):
+      if results[i]['percent_mod'] > 0.09:
+        print(results[i]['motif'],'\t',
+              results[i]['occurences'],'\t',
+              results[i]['modified'],'\t',
+              results[i]['percent_mod'])

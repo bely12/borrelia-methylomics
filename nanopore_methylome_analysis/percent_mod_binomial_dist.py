@@ -72,7 +72,7 @@ for i in range(len(motif_list)):
   motif_list[i] = motif_list[i].replace("\n", "")
 
 # get percent modified for each motif in negative control list and calculate mean for binomial distribution test
-results = seq_tools.get_mod_frequncy(motif_list, bed3, mod_pos = args.mod_pos, mod_call_thresh = args.mod_call_thresh, min_cov = args.min_cov)
+results = seq_tools.get_mod_frequency(motif_list, bed3, mod_pos = args.mod_pos, mod_call_thresh = args.mod_call_thresh, min_cov = args.min_cov)
 total_occurences = sum(item.get('occurences') for item in results)
 total_modified = sum(item.get('modified') for item in results)
 prob = round((total_modified / total_occurences) * 100, 2)

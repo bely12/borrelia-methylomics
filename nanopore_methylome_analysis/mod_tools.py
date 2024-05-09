@@ -11,8 +11,106 @@ def ambig_seq_mod(motif_dict):
       all_seqs.append({'seq':"".join(i), 'mod_pos': rec['mod_pos']})
   return all_seqs
 
+def all_kmers(k):
+  '''
+  required for top_kmers() function
+  '''
+  nucleotides = ['A', 'T', 'C', 'G']
+  if k < 1:
+    return []
+  if k == 1:
+    return nucleotides
+  sub_sequences = all_kmers(k - 1)
+  sequences = []
+  for sequence in sub_sequences:
+    for nucleotide in nucleotides:
+      sequences.append(nucleotide + sequence)
+  return sequences
 
-def get_mod_frequncy(motif_list, bed_dict, mod_pos, mod_call_thresh, min_cov = 1):
+def Nmaxelements(list1, N):
+    '''
+    required for top_kmers() function
+    '''
+    final_list = []
+    for i in range(0, N):
+        max1 = 0
+        for j in range(len(list1)):
+            if list1[j] > max1:
+                max1 = list1[j]
+        list1.remove(max1)
+        final_list.append(max1)
+    return final_list
+
+def top_kmers(seqList, mA, length_set, top_n):
+  '''
+  seqList = set of likely modified kmers with adenine in center position, multifasta file format
+  mA = the position of the likely modified adenine in your input sequences ex. if they are 11mers, mA = 5
+  length_set = enter as a list every kmer length you'd like to test for potential targets ex. [4,5,6] will test all kmers of length 4, 5, & 6
+  top_n = top n motifs to keep/record with the greatest number of counts in your input seqs
+  '''
+  counts = []
+  final_list = []
+
+  #for each length target you want to search
+  for k in range(length_set[0],length_set[(len(length_set)-1)]+1):
+
+    #generate a set of all kmers of specified length
+    temp = all_kmers(k)
+
+    #keep only kmers containing at least 1 adenine
+    a_kmers = []
+    for kmer in temp:
+      if 'A' in kmer:
+        a_kmers.append(kmer)
+
+    #one kmer at a time, iterate through candidate seqs and count the number of seqs it occurs in
+    for a_kmer in a_kmers:
+      count = 0
+      for n in range(len(seqList)):
+        seq = str(seqList[n].seq)
+        #set the range within candidate seq to look in; this depends on the position of the modA and length of kmer
+        if k > mA:
+          sliced_seq = seq
+        else:
+          sliced_seq = seq[(mA+1)-k:mA+k]
+        # count if match is found
+        # if a_kmer in sliced_seq:
+        #   count += 1
+        
+        new_start = mA+1 - k
+        #sliced_seq = seq[new_start:mA+k]
+        matched = sliced_seq.find(a_kmer) != -1
+        if matched == True:
+          count += 1
+          og_start = new_start + sliced_seq.find(a_kmer)
+          mod_pos = mA - og_start +1
+
+      #record counts into a dictionary, then move on to the next kmer
+      if count > 1:
+        counts.append({'kmer_len': k, 'seq': a_kmer, 'count': count, 'mod_pos': mod_pos})
+
+  #look at results for 1 kmer length at a time
+  for length in length_set:
+    filtered_counts = list(filter(lambda x: x['kmer_len'] == length, counts))
+
+    #extract count for each kmer and put into new list
+    values = []
+    for i in range(len(filtered_counts)):
+      values.append(filtered_counts[i]['count'])
+
+    #identify the kmers with the n highest values and filter for kmers with those values
+    top_counts = Nmaxelements(values, top_n)
+    filtered_counts2 = list(filter(lambda x: x['count'] >= top_counts[len(top_counts)-1], filtered_counts))
+
+    #print the results
+    # for rec in filtered_counts2:
+    #   print(rec['kmer_len'],'\t',rec['seq'],'\t',rec['count'],'\t',rec['mod_pos'])
+
+    final_list.append(filtered_counts2)
+  return final_list
+
+
+def get_mod_frequency(motif_list, bed_dict, mod_pos, mod_call_thresh, min_cov = 1):
   '''
   inputs:
   motif_list is list of all possible sequences (returned in get_consesus() and dict['seqs'])
