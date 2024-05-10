@@ -87,8 +87,12 @@ if args.bed != None:
   # print results in fasta format
   k = 1
   for seq in fixed_kmers:
-    print('>seq_',k,'\n',seq, sep='', file = open(args.out+'_positive_seqs.fasta', "a"))
-    k += 1
+    if args.all != None:
+      print('>seq_',k,'\n',seq, sep='', file = open(args.out+'_sampled_adenine_seqs.fasta', "a"))
+      k += 1
+    else:
+      print('>seq_',k,'\n',seq, sep='', file = open(args.out+'_positive_seqs.fasta', "a"))
+      k += 1
 
   if args.controls == True:
     #create multi fasta for control seeks
