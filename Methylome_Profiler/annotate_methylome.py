@@ -113,13 +113,13 @@ for i in range(len(regions)):
     if ( x[j]['position'] >= regions[i]['start'] ) and ( x[j]['position'] <= regions[i]['end'] ):
       if x[j]['status'] == 'modified' and x[j]['motif'] != 'off_target':
         mod+=1
-        new_mod_sites.append(dict(x[j], regions[i]['gene_id'])) #*test
+        new_mod_sites.append(dict(x[j], annot = regions[i]['gene_id'])) #*test
       if x[j]['status'] == 'unmodified' and x[j]['motif'] != 'off_target':
         non_mod+=1
-        new_mod_sites.append(dict(x[j], regions[i]['gene_id'])) #*test
+        new_mod_sites.append(dict(x[j], annot = regions[i]['gene_id'])) #*test
       if x[j]['motif'] == 'off_target':
         off_target_mod+=1
-        new_mod_sites.append(dict(x[j], regions[i]['gene_id'])) #*test
+        new_mod_sites.append(dict(x[j], annot = regions[i]['gene_id'])) #*test
   
   #add counts to table 
   results.append(dict(regions[i], target_mod = mod, target_no_mod = non_mod, off_target = off_target_mod))
