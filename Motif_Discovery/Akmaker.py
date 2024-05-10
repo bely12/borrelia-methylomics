@@ -97,7 +97,7 @@ if args.bed != None:
   if args.controls == True:
     #create multi fasta for control seeks
     z = 1
-    for i in range(k): 
+    for i in range(k-1): 
       position = random.randint(1, len(ref[0].seq)-args.len)
       seq = ref[0].seq[position:position+args.len]
       print('>control_', z,'\n', seq, sep='', file = open(args.out+'_control_seqs.fasta', "a"))
