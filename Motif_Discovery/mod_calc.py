@@ -94,6 +94,8 @@ total_modified = sum(item.get('modified') for item in results)
 
 #print total results info 
 print('\n')
+print('found in genome = ',total_occurences)
+print('modified in genome = ', total_modified)
 print('Total percent modfied for all motifs = ',
       round((total_modified / total_occurences) * 100, 2))
 
