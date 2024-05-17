@@ -13,6 +13,7 @@ parser.add_argument('-sites', help='file containing methylation sites; use outpu
 parser.add_argument('-seq_len', help='file containing a column with seq id and a column with seq length\n')
 parser.add_argument('-win', type=int, help='size of window\n')
 parser.add_argument('-step', type=int, help='size of step for slide\n')
+parser.add_argument('-all', const=True, nargs='?', help='returns both methylated target sites and off-target sites')
 parser.add_argument('-out', help='pre-fix for output file', default=None)
 args = parser.parse_args()
 
@@ -51,8 +52,12 @@ for column in df:
   if column != 'pos':
     df[column] = df[column].str.strip()
 
-#filter for just target sites
-df = df.loc[(df['motif'] != 'off_target') & (df['status'] == 'modified')]
+#filter for types of methylation (target site only, or off-target site as well)
+if args.all != None:
+  df = df.loc[ df['status'] == 'modified' ]
+else:
+  df = df.loc[(df['motif'] != 'off_target') & (df['status'] == 'modified')]
+
 mod_dict = df.to_dict('records')
 
 #load table with seq id's and lengths 
