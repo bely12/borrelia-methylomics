@@ -4,23 +4,22 @@ Brief overview of workflow starting with the bed file produced by ONT's ModKit:
 
 # Motif Discovery 
 
-I. get_adenine_kmers.py
+I. Akmaker.py
 
   Retrieves the nucleotides surrounding potential modified adenines in a specified window size.
   Outputs adenine centered kmers in fasta format, along with a control set of sequences to be used to find enriched patterns 
 
-II. Streme
+II. motif_discovery.py
 
-  Input the positive adenine kmers and controls seqs to detect candidate methylated target motifs
+  Takes multifasta of moified adenine-centered kmers and returns a list of sequences of specified length (potential motifs) that occur most frequently, as well as the percent modification for the sequence. Use these highly modified sequences as a starting point for defining a consensus target motif. 
 
-III. calculate_percent_mod.py; percent_mod_binomial_dist.py
+III. mod_calc.py
 
-  Calculate what percentage of target sites are modified in your ONT data.
-  Can perform a binomial distribuition test if necessary
+  Calculate percent modification for a consensus target motif in your ONT data.
 
 -------------------------------------------------------
 
-# Methylome Profile
+# Methylome Profiler
 
 I. Map modifications to the genome
   Program: mod_mapper.py
