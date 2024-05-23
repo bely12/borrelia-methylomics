@@ -22,7 +22,7 @@ parser.add_argument('-motif_file', default=None, help='list of seqs from txt fil
 parser.add_argument('-mod_pos', type=int, help='position of predicted mod base in motif')
 parser.add_argument('-mod_call_thresh', type=float, default=50.0, help='threshold for calling a position modified in bed file')
 parser.add_argument('-min_cov', type=int, default=10, help='mininum position coverage to filter for')
-
+parser.add_argument('-out', default=None, help='prefix for output file')
 args = parser.parse_args()
 
 
@@ -88,7 +88,6 @@ for i in range(len(results)):
             results[i]['percent_mod'])
 
 ### summarize total results
-#binomial sampling test
 total_occurences = sum(item.get('occurences') for item in results)
 total_modified = sum(item.get('modified') for item in results)
 
@@ -99,3 +98,7 @@ print('modified in genome = ', total_modified)
 print('Total percent modfied for all motifs = ',
       round((total_modified / total_occurences) * 100, 2))
 
+### output file ###
+if args.out != None:
+  df = pd.DataFrame.from_dict(results)
+  df.to_csv(args.out+'_mod_calc.tsv', sep='\t', index=False, header=True)
