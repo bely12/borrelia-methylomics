@@ -5,7 +5,12 @@ import pandas as pd
 import random
 from random import sample
 import math
-import seq_tools
+import sys
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+from tools_and_utilities import seq_tools
 import argparse
 from argparse import RawTextHelpFormatter
 

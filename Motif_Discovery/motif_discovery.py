@@ -3,8 +3,13 @@ import Bio
 from Bio import SeqIO
 import pandas as pd
 import numpy as np
-import seq_tools
-import mod_tools
+import sys
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+from tools_and_utilities import seq_tools
+from tools_and_utilities import mod_tools
 import argparse
 from argparse import RawTextHelpFormatter
 

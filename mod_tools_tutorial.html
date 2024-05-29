@@ -13971,7 +13971,7 @@ a.anchor-link {
 
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2>Restriction-Modification System Target Motif Analysis Tutorial</h2>
+<h2>6mA motif identification and methylome characterization - tutorial</h2>
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
@@ -13981,10 +13981,7 @@ a.anchor-link {
 Identifies target motifs of the RM system(s) harbored in your genome and calculates the percentage of sites within the motif genome wide that are modified. <p></p>
 <p><p>
 <b>2. Methylome Profiler </b> <br>
-Maps all modified bases to your genome and</p>
-<p><ul>counts the number of modified bases within all coding and intergenic regions <br>
-summarizes total counts across all genomic elements in your genome <br>
-peforms sliding window analysis to calculate modification rates across areas of interest</ul><p>
+Maps all modified bases to your genome, counts modified bases within all coding and intergenic regions, counts across all genomic elements, sliding window methylation rates<p>
 <b>3. Motif Analysis </b><br>
 Statistical testing on whether identified RM target motifs are enriched or avoided in different areas of your genome <p></p>
 <p>To get started, clone the github repo to your local machine:</p>
@@ -14188,7 +14185,7 @@ Total percent modfied for all motifs =  97.3
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>View sites map</p>
+<p>View sites table</p>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
@@ -14304,8 +14301,9 @@ Total percent modfied for all motifs =  97.3
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p><b><h4>Link modified sites to features in the genome</h4></b></p>
 <p><b>Script:</b> annotate_methylome.py <p></p>
-<p><b>Inputs:</b> .gbff file and modified sites table (produced by mod_mapper.py)  <p></p>
+<p><b>Inputs:</b> .gbff file and modified sites table  <p></p>
 <p><b>Output:</b><br>
+3 tsv files named as below following user assigned prefix
 mod_annotations.tsv: table of modified base counts and normalized rates within all cds and intergenic regions of genome <br>
 annotated_sites.tsv: table of modified sites with column for the gene ID corresponding to the coordinate (or interegenic if not within cds) <br>
 summary.tsv: table of modified base counts and normalized rates for each chromosome/plasmid in the genome</p>
@@ -14345,7 +14343,7 @@ summary.tsv: table of modified base counts and normalized rates for each chromos
 <span class="n">feature_counts</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">feature_counts_file</span><span class="p">)</span>
 <span class="c1">#filter for element_id&#39;s within test files </span>
 <span class="n">feature_counts</span> <span class="o">=</span> <span class="n">feature_counts</span><span class="p">[</span> <span class="p">((</span><span class="n">feature_counts</span><span class="p">[</span><span class="s1">&#39;element_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;NC_001849.2&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">feature_counts</span><span class="p">[</span><span class="s1">&#39;element_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;NC_001852.1&#39;</span><span class="p">))]</span>
-<span class="c1">#look at it</span>
+
 <span class="n">feature_counts</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 
