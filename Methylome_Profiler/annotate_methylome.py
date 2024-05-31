@@ -107,18 +107,6 @@ for plasmid in df.element_id.unique():
     if df2.loc[row+1]['element_len'] > df2.loc[row+1]['end']:
       regions.append({'element_id': plasmid, 'len': df2.loc[0]['element_len'], 'start': df2.iloc[-1]['end']+1, 'end': df2.loc[row]['element_len'], 'gene_id': 'intergenic','protein_id': 'na', 'strand': 'na'})
 
-### this chunk makes a few minor errors that might mattter for some genomes and gbff files. Remove if the chunk above resolves problem!
-# for plasmid in df.element_id.unique():
-#   df2 = df[(df['element_id'] == plasmid)].reset_index()
-#   regions.append({'element_id': plasmid, 'len': df2.loc[0]['element_len'], 'start': 1, 'end': df2.loc[0]['start']-1, 'gene_id': 'intergenic', 'protein_id': 'na', 'strand': 'na'})
-#   for row in range(len(df2.index)-1):
-#     regions.append({'element_id': plasmid,'len': df2.loc[0]['element_len'], 'start': df2.loc[row]['start'], 'end': df2.loc[row]['end'], 'gene_id': df2.loc[row]['gene_id'], 'protein_id': df2.loc[row]['protein_id'], 'strand': df2.loc[row]['strand']})
-#     if row < len(df2.index):
-#       if df2.loc[row]['end']+1 < df2.loc[row+1]['start']:
-#         regions.append({'element_id': plasmid, 'len': df2.loc[0]['element_len'], 'start': df2.loc[row]['end']+1, 'end': df2.loc[row+1]['start']-1, 'gene_id': 'intergenic', 'protein_id': 'na', 'strand': 'na'})
-#   regions.append({'element_id': plasmid, 'len': df2.loc[0]['element_len'], 'start': df2.loc[row+1]['start'], 'end': df2.loc[row+1]['end'], 'gene_id': df2.loc[row+1]['gene_id'], 'protein_id': df2.loc[row+1]['protein_id'], 'strand': df2.loc[row+1]['strand']})
-#   regions.append({'element_id': plasmid, 'len': df2.loc[0]['element_len'], 'start': df2.iloc[-1]['end']+1, 'end': df2.loc[row]['element_len'], 'gene_id': 'intergenic','protein_id': 'na', 'strand': 'na'})
-
 
 ### import and format mod sites table ###
 mods = pd.read_table(args.sites, header=None)
