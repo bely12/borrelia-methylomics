@@ -41,7 +41,7 @@ def Nmaxelements(list1, N):
         final_list.append(max1)
     return final_list
 
-def top_kmers(seqList, mA, length_set, top_n):
+def top_kmers(seqList, mA, length_set, top_n, mod_base = 'A'):
   '''
   seqList = set of likely modified kmers with adenine in center position, multifasta file format
   mA = the position of the likely modified adenine in your input sequences ex. if they are 11mers, mA = 5
@@ -60,7 +60,7 @@ def top_kmers(seqList, mA, length_set, top_n):
     #keep only kmers containing at least 1 adenine
     a_kmers = []
     for kmer in temp:
-      if 'A' in kmer:
+      if mod_base in kmer:
         a_kmers.append(kmer)
 
     #one kmer at a time, iterate through candidate seqs and count the number of seqs it occurs in
@@ -125,7 +125,8 @@ def get_mod_frequency(motif_list, bed_dict, mod_pos, mod_call_thresh, min_cov = 
   for motif in motif_list:
     found = 0
     modified = 0
-    start = 6 - mod_pos
+    #start = 6 - mod_pos # used for 11mers
+    start = 16 - mod_pos # use for 31mers
     end = start + len(motif)
     for i in range(len(bed_dict)):
       #if re.search(motif, bed_dict[i]['kmer'][start:end]) != None and bed_dict[i]['cov'] >= min_cov:

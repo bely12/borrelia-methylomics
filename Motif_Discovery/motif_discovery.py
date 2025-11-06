@@ -24,6 +24,7 @@ def list_of_ints(arg):
 parser.add_argument('-bed', help='tsv bed file with mod calls and kmers. kmers must be in the 3rd column of the table, no header\n')
 parser.add_argument('-ref', default = None, help='reference genome in fasta or multi fasta format, first seq will be used to generate control seqs')
 parser.add_argument('-candidates', help='mutli fasta file with candidate kmers centered on mod adenine')
+parser.add_argument('-mod_base', default = 'A', help='what modified base ex. A or C')
 parser.add_argument('-mod_pos_index', help='index position of mod adenine in candidate seqs', type=int)
 parser.add_argument('-mod_call_thresh', type=float, default=50.0, help='threshold for calling a position modified in bed file')
 parser.add_argument('-min_cov', type=int, default=10, help='mininum position coverage to filter for')
@@ -39,9 +40,25 @@ for i in range(len(ref)):
 
 #prepare bed file and convert to list of row dictionaries 
 bed = pd.read_table(args.bed, sep = '\t', header=None)
-bed[['cov', 'mod_freq', 'N_mod', 'N_can', 'N_other', 'N_del', 'N_fail', 'N_diff', 'N_nocall']] = bed[9].str.split(' ', expand=True)
-bed = bed.rename(columns={0: 'chromosome', 1: 'start', 2: 'end', 3: 'mod', 4: 'score', 5: 'strand'})
-bed = bed.drop(columns=[6,7,8,9])
+#bed[['cov', 'mod_freq', 'N_mod', 'N_can', 'N_other', 'N_del', 'N_fail', 'N_diff', 'N_nocall']] = bed[9].str.split(' ', expand=True)
+#bed = bed.rename(columns={0: 'chromosome', 1: 'start', 2: 'end', 3: 'mod', 4: 'score', 5: 'strand'})
+#bed = bed.drop(columns=[6,7,8,9])
+bed = bed.rename(columns={0: 'chromosome', 
+                          1: 'start', 
+                          2: 'end', 
+                          3: 'mod', 
+                          4: 'score', 
+                          5: 'strand',
+                          9:'cov',
+                          10:'mod_freq',
+                          11:'N_mod',
+                          12:'N_can',
+                          13:'N_other',
+                          14:'N_del',
+                          15:'N_fail',
+                          16:'N_diff',
+                          17:'N_nocall'})
+bed = bed.drop(columns=[6,7,8])
 bed['mod_freq'] = bed['mod_freq'].astype(float)
 bed['cov'] = bed['cov'].astype(int)
 recs = bed.to_dict('records')
@@ -55,7 +72,8 @@ for i in range(len(recs)):
   #find the plasmid in the reference genome and extraxt kmer
   for j in range(len(ref)):
     if ref[j].id == plasmid:
-      seq = str(ref[j].seq[position-5 : position+6])
+      #seq = str(ref[j].seq[position-5 : position+6]) # for 11mers
+      seq = str(ref[j].seq[position-15 : position+16]) # for longer 31mers
       if recs[i]['strand'] == '-':
         seq = seq_tools.reverse_complement(seq)
       #make a new list of dictionaries by adding 11mer as key value pair to existing bedmethyl dictionaries
@@ -64,13 +82,14 @@ for i in range(len(recs)):
 #bed2
 
 #remove errant kmers (don't have potential 6mA in correct position)
-bed3 = [i for i in bed2 if not ( (len(i['kmer']) != 11) or (i['kmer'][5] != 'A') )]
+#bed3 = [i for i in bed2 if not ( (len(i['kmer']) != 11) or (i['kmer'][5] != 'A') )] # for 11mers
+bed3 = [i for i in bed2 if not ( (len(i['kmer']) != 31) or (i['kmer'][15] != args.mod_base) )] # for 31mers
 
 ### get most common kmers in candidate seqs ###
 #load candidate motifs (output from get_adenine_kmers.py)
 seqList = list(SeqIO.parse(args.candidates, "fasta"))
 #find potential target motifs
-test_motifs = mod_tools.top_kmers(seqList, args.mod_pos_index, args.target_lengths, args.n_targets)
+test_motifs = mod_tools.top_kmers(seqList, args.mod_pos_index, args.target_lengths, args.n_targets, mod_base = args.mod_base)
 
 
 ### caclculate percent modified for the most common kmers within candidate seqs ###

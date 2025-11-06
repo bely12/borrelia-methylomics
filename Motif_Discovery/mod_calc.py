@@ -24,6 +24,7 @@ parser.add_argument('-bed', help='tsv bed file with mod calls and kmers. kmers m
 parser.add_argument('-ref', default = None, help='reference genome in fasta or multi fasta format, first seq will be used to generate control seqs')
 parser.add_argument('-motif', default=None, help='motif of interst')
 parser.add_argument('-motif_file', default=None, help='list of seqs from txt file, one seq per line')
+parser.add_argument('-mod_base', default = 'A', help='what modified base ex. A or C')
 parser.add_argument('-mod_pos', type=int, help='position of predicted mod base in motif')
 parser.add_argument('-mod_call_thresh', type=float, default=50.0, help='threshold for calling a position modified in bed file')
 parser.add_argument('-min_cov', type=int, default=10, help='mininum position coverage to filter for')
@@ -39,6 +40,8 @@ for i in range(len(ref)):
 #prepare bed file and convert to list of row dictionaries 
 bed = pd.read_table(args.bed, sep = '\t', header=None)
 #bed[['cov', 'mod_freq', 'N_mod', 'N_can', 'N_other', 'N_del', 'N_fail', 'N_diff', 'N_nocall']] = bed[9].str.split(' ', expand=True) #new modkit output separates columns better, so don't need this
+#bed = bed.rename(columns={0: 'chromosome', 1: 'start', 2: 'end', 3: 'mod', 4: 'score', 5: 'strand'})
+#bed = bed.drop(columns=[6,7,8,9]) #need this with old modkit output, use below for new output
 bed = bed.rename(columns={0: 'chromosome', 
                           1: 'start', 
                           2: 'end', 
@@ -54,7 +57,6 @@ bed = bed.rename(columns={0: 'chromosome',
                           15:'N_fail',
                           16:'N_diff',
                           17:'N_nocall'})
-#bed = bed.drop(columns=[6,7,8,9]) #need this with old modkit output, use below for new output
 bed = bed.drop(columns=[6,7,8])
 bed['mod_freq'] = bed['mod_freq'].astype(float)
 bed['cov'] = bed['cov'].astype(int)
@@ -69,7 +71,8 @@ for i in range(len(recs)):
   #find the plasmid in the reference genome and extraxt kmer
   for j in range(len(ref)):
     if ref[j].id == plasmid:
-      seq = str(ref[j].seq[position-5 : position+6])
+      #seq = str(ref[j].seq[position-5 : position+6])
+      seq = str(ref[j].seq[position-15 : position+16]) # try this for 31mers instead of 11mers for longer motifs
       if recs[i]['strand'] == '-':
         seq = seq_tools.reverse_complement(seq)
       #make a new list of dictionaries by adding 11mer as key value pair to existing bedmethyl dictionaries
@@ -78,7 +81,8 @@ for i in range(len(recs)):
 #bed2
 
 #remove errant kmers (don't have potential 6mA in correct position)
-bed3 = [i for i in bed2 if not ( (len(i['kmer']) != 11) or (i['kmer'][5] != 'A') )]
+#bed3 = [i for i in bed2 if not ( (len(i['kmer']) != 11) or (i['kmer'][5] != args.mod_base) )]
+bed3 = [i for i in bed2 if not ( (len(i['kmer']) != 31) or (i['kmer'][15] != args.mod_base) )]
 
 #generate list of motif possibilities, find all occurances, and calculate percent methylated for each
 #if input is a single motif with the --motif arg 

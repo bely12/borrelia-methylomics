@@ -28,6 +28,7 @@ parser.add_argument('-ref', default = None, help='reference genome in fasta or m
 parser.add_argument('-all', const=True, nargs='?')
 parser.add_argument('-sample', type=int, help='number of random adenine kmers if selecting all arg', default=None)
 parser.add_argument('-modified', const=True, nargs='?')
+parser.add_argument('-mod_base', default = 'A', help='what modified base ex. A or C')
 
 parser.add_argument('-len', default=11, type=int, help='size of kmer you wish to extract')
 parser.add_argument('-depth', default=10, type=int, help='minimum sequencing depth to use, inclusive')
@@ -49,13 +50,31 @@ for i in range(len(ref)):
 if args.bed != None:
   # import bedmethyl table and do some formatting
   bed = pd.read_table(args.bed, sep = '\t', header=None)
-  bed[['cov', 'percent_mod', 'N_mod', 'N_can', 'N_other', 'N_del', 'N_fail', 'N_diff', 'N_nocall']] = bed[9].str.split(' ', expand=True)
-  bed = bed.rename(columns={0: 'chromosome', 1: 'start', 2: 'end', 3: 'mod', 4: 'score', 5: 'strand'})
-  bed = bed.drop(columns=[6,7,8,9])
-  bed['percent_mod'] = bed['percent_mod'].astype(float)
+  #bed[['cov', 'percent_mod', 'N_mod', 'N_can', 'N_other', 'N_del', 'N_fail', 'N_diff', 'N_nocall']] = bed[9].str.split(' ', expand=True)
+  #bed = bed.rename(columns={0: 'chromosome', 1: 'start', 2: 'end', 3: 'mod', 4: 'score', 5: 'strand'})
+  #bed = bed.drop(columns=[6,7,8,9])
+  
+  bed = bed.rename(columns={0: 'chromosome', 
+                          1: 'start', 
+                          2: 'end', 
+                          3: 'mod', 
+                          4: 'score', 
+                          5: 'strand',
+                          9:'cov',
+                          10:'mod_freq',
+                          11:'N_mod',
+                          12:'N_can',
+                          13:'N_other',
+                          14:'N_del',
+                          15:'N_fail',
+                          16:'N_diff',
+                          17:'N_nocall'})
+  
+  bed = bed.drop(columns=[6,7,8])
+  bed['mod_freq'] = bed['mod_freq'].astype(float)
   bed['cov'] = bed['cov'].astype(int)
 
-  # random sample adenine kmers
+  # random sample kmers
   if args.all == True:
     df = bed[ bed['cov'] >= args.depth] #filter for positions with at least 10X depth 
     recs = df.to_dict('records')
@@ -85,15 +104,15 @@ if args.bed != None:
         kmers.append(seq)
         break
 
-  # remove errant kmers that do not have A in middle position
+  # remove errant kmers that do not have the correct modified base in middle position
   #fixed_kmers = [i for i in kmers if not (i[5] != 'A')]
-  fixed_kmers = [i for i in kmers if not (i[down] != 'A')] #for any size kmer
+  fixed_kmers = [i for i in kmers if not (i[down] != args.mod_type)] #for any size kmer
 
   # print results in fasta format
   k = 1
   for seq in fixed_kmers:
     if args.all != None:
-      print('>seq_',k,'\n',seq, sep='', file = open(args.out+'_sampled_adenine_seqs.fasta', "a"))
+      print('>seq_',k,'\n',seq, sep='', file = open(args.out+'_sampled_kmer_seqs.fasta', "a"))
       k += 1
     else:
       print('>seq_',k,'\n',seq, sep='', file = open(args.out+'_positive_seqs.fasta', "a"))
