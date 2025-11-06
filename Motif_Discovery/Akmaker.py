@@ -83,7 +83,7 @@ if args.bed != None:
 
   # get kmers for likely 6mA positions
   if args.modified == True:
-    df = bed[ (bed['percent_mod'] > args.mod_threshold) & (bed['cov'] >= args.depth)]
+    df = bed[ (bed['mod_freq'] > args.mod_threshold) & (bed['cov'] >= args.depth)]
     recs = df.to_dict('records')
 
   # extract 11mers for every adenine 
