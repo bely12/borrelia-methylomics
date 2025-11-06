@@ -106,7 +106,7 @@ if args.bed != None:
 
   # remove errant kmers that do not have the correct modified base in middle position
   #fixed_kmers = [i for i in kmers if not (i[5] != 'A')]
-  fixed_kmers = [i for i in kmers if not (i[down] != args.mod_type)] #for any size kmer
+  fixed_kmers = [i for i in kmers if not (i[down] != args.mod_base)] #for any size kmer
 
   # print results in fasta format
   k = 1
