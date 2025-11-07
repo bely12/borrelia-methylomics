@@ -1,7 +1,7 @@
 import Bio.Data.IUPACData as bdi
 import python_codon_tables as pct
 from itertools import product
-from collections import Counter
+from collections import Counter, defaultdict
 
 def ambig_seq_mod(motif_dict):
   ambig = bdi.ambiguous_dna_values
@@ -118,12 +118,15 @@ def top_kmers_fast(seqList, mA, length_set, top_n, mod_base='A'):
 
   for k in range(length_set[0], length_set[-1] + 1):
     kmer_counts = Counter()
+    mod_positions = defaultdict(Counter)
 
     for record in seqList:
       seq = str(record.seq)
       if k > mA:
         sliced_seq = seq
+        new_start = 0 
       else:
+        new_start = (mA + 1) - k
         sliced_seq = seq[(mA+1)-k : mA+k]
 
       # iterate over all kmers that overlap the modified base
@@ -132,8 +135,17 @@ def top_kmers_fast(seqList, mA, length_set, top_n, mod_base='A'):
         if mod_base in kmer:
           kmer_counts[kmer] += 1
 
-    # keep only those with count > 1
-    filtered_counts = [{'kmer_len': k, 'seq': seq, 'count': count} for seq, count in kmer_counts.items() if count > 1]
+          og_start = new_start + i   # compute absolute start index
+          mod_pos = mA - og_start + 1 # position of mod base inside kmer
+          mod_positions[kmer][mod_pos] += 1 # count mod_pos occurrence
+
+    # filter results
+    filtered_counts = []
+    for kmer_seq, count in kmer_counts.items():
+      if count > 1:
+        most_common_mod_pos = mod_positions[kmer_seq].most_common(1)[0][0]  # pick most frequent mod_pos
+        filtered_counts.append({'kmer_len': k,'seq': kmer_seq,'count': count,'mod_pos': most_common_mod_pos })
+
 
     # select top_n kmers
     if filtered_counts:
