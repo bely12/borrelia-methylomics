@@ -89,7 +89,7 @@ bed3 = [i for i in bed2 if not ( (len(i['kmer']) != 31) or (i['kmer'][15] != arg
 #load candidate motifs (output from get_adenine_kmers.py)
 seqList = list(SeqIO.parse(args.candidates, "fasta"))
 #find potential target motifs
-test_motifs = mod_tools.top_kmers(seqList, args.mod_pos_index, args.target_lengths, args.n_targets, mod_base = args.mod_base)
+test_motifs = mod_tools.top_kmers_fast(seqList, args.mod_pos_index, args.target_lengths, args.n_targets, mod_base = args.mod_base)
 
 
 ### caclculate percent modified for the most common kmers within candidate seqs ###

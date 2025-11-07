@@ -1,6 +1,7 @@
 import Bio.Data.IUPACData as bdi
 import python_codon_tables as pct
 from itertools import product
+from collections import Counter
 
 def ambig_seq_mod(motif_dict):
   ambig = bdi.ambiguous_dna_values
@@ -109,6 +110,37 @@ def top_kmers(seqList, mA, length_set, top_n, mod_base = 'A'):
     final_list.append(filtered_counts2)
   return final_list
 
+def top_kmers_fast(seqList, mA, length_set, top_n, mod_base='A'):
+  """
+  improved version of top_kmers: only counts kmers that occur in seqList.
+  """
+  final_list = []
+
+  for k in range(length_set[0], length_set[-1] + 1):
+    kmer_counts = Counter()
+
+    for record in seqList:
+      seq = str(record.seq)
+      if k > mA:
+        sliced_seq = seq
+      else:
+        sliced_seq = seq[(mA+1)-k : mA+k]
+
+      # iterate over all kmers that overlap the modified base
+      for i in range(len(sliced_seq) - k + 1):
+        kmer = sliced_seq[i:i+k]
+        if mod_base in kmer:
+          kmer_counts[kmer] += 1
+
+    # keep only those with count > 1
+    filtered_counts = [{'kmer_len': k, 'seq': seq, 'count': count} for seq, count in kmer_counts.items() if count > 1]
+
+    # select top_n kmers
+    if filtered_counts:
+      top_counts = sorted(filtered_counts, key=lambda x: x['count'], reverse=True)[:top_n]
+      final_list.append(top_counts)
+
+  return final_list
 
 def get_mod_frequency(motif_list, bed_dict, mod_pos, mod_call_thresh, min_cov = 1):
   '''
