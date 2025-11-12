@@ -167,6 +167,7 @@ def get_mod_frequency(motif_list, bed_dict, mod_pos, mod_call_thresh, min_cov = 
   results = []
   #interate through motif_list
   for motif in motif_list:
+    mean_mod_freq = []
     found = 0
     modified = 0
     #start = 6 - mod_pos # used for 11mers
@@ -176,13 +177,14 @@ def get_mod_frequency(motif_list, bed_dict, mod_pos, mod_call_thresh, min_cov = 
       #if re.search(motif, bed_dict[i]['kmer'][start:end]) != None and bed_dict[i]['cov'] >= min_cov:
       if ( motif == bed_dict[i]['kmer'][start:end] ) and ( bed_dict[i]['cov'] >= min_cov ):
         found += 1
+        mean_mod_freq.append(bed_dict[i]['mod_freq'])
         if bed_dict[i]['mod_freq'] >= mod_call_thresh:
           modified += 1
     #calculate avg modified frequncy for motif and record in results dictionary
     if modified >= 1:
-      results.append({'motif': motif, 'occurences': found, 'modified': modified, 'percent_mod': round(modified/found, 3)})
+      results.append({'motif': motif, 'occurences': found, 'modified': modified, 'percent_mod': round(modified/found, 3), 'mean_mod_freq': round(sum(mean_mod_freq)/found,3)})
     else:
-      results.append({'motif': motif, 'occurences': found, 'modified': modified, 'percent_mod': 0})
+      results.append({'motif': motif, 'occurences': found, 'modified': modified, 'percent_mod': 0, 'mean_mod_freq': round(sum(mean_mod_freq)/found,3)})
   return results
 
 
