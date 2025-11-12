@@ -99,6 +99,7 @@ if args.motif_file != None:
 #get percent modified for each motif 
 results = mod_tools.get_mod_frequency(motif_list, bed3, mod_pos = args.mod_pos, mod_call_thresh = args.mod_call_thresh, min_cov = args.min_cov)
 
+mean_mod_freq = mod_tools.get_mean_mod_feq(motif_list, bed3, mod_pos = args.mod_pos, min_cov = args.min_cov)
 
 ### summarize individual results
 #set column name for results table 
@@ -114,7 +115,6 @@ for i in range(len(results)):
 ### summarize total results
 total_occurences = sum(item.get('occurences') for item in results)
 total_modified = sum(item.get('modified') for item in results)
-mean_mod_freq = np.mean(item.get('mean_mod_freq') for item in results)
 
 #print total results info 
 print('\n')
@@ -123,7 +123,9 @@ print('modified in genome = ', total_modified)
 print('Total percent modfied for all motifs = ',
       round((total_modified / total_occurences) * 100, 2))
 
-print('mean mod_freq for sites within motif = ', mean_mod_freq)
+
+print('Mean mod freq for motif per site = ', mean_mod_freq)
+
 
 ### output file ###
 if args.out != None:
