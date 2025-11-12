@@ -99,7 +99,7 @@ if args.motif_file != None:
 #get percent modified for each motif 
 results = mod_tools.get_mod_frequency(motif_list, bed3, mod_pos = args.mod_pos, mod_call_thresh = args.mod_call_thresh, min_cov = args.min_cov)
 
-mean_mod_freq = mod_tools.get_mean_mod_feq(motif_list, bed3, mod_pos = args.mod_pos, min_cov = args.min_cov)
+mean_mod_freq = mod_tools.get_mean_mod_freq(motif_list, bed3, mod_pos = args.mod_pos, min_cov = args.min_cov)
 
 ### summarize individual results
 #set column name for results table 
