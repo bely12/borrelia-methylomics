@@ -12,6 +12,9 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('-bed', help='tsv bed file with mod calls and kmers. kmers must be in the 3rd column of the table, no header\n')
 parser.add_argument('-min_cov', type=int, default=10, help='mininum position coverage to filter for')
+parser.add_argument('-n', type=float, default = 0.0, help='get rid of mod_freqs below a threshold to eliminate 0 rows')
+parser.add_argument('-log', default = "False", help='should y axis be log scaled?')
+
 parser.add_argument('-out', default=None, help='prefix for output file')
 args = parser.parse_args()
 
@@ -39,7 +42,7 @@ bed['mod_freq'] = bed['mod_freq'].astype(float)
 bed['cov'] = bed['cov'].astype(int)
 
 # filter for specified coverage
-filtered_bed = bed[bed['cov'] >= args.min_cov]
+filtered_bed = bed[(bed['cov'] >= args.min_cov) & (bed['mod_freq'] >= args.n)]
 
 if filtered_bed.empty:
     raise ValueError(f"No positions with coverage >= {args.min_cov}")
@@ -47,9 +50,15 @@ if filtered_bed.empty:
 # histogram
 plt.figure(figsize=(7,4))
 plt.hist(filtered_bed['mod_freq'], bins=100, color='blue', edgecolor='black')
-plt.xlabel('mod frequency')
-plt.ylabel('count')
+plt.xlabel('Modification frequency')
+plt.ylabel('Count')
 
+# log-scale on y-axis
+if args.log.lower() == "true":
+    plt.yscale('log')
+
+# OUTPUT
 out_plot = f"{args.out}.png"
 plt.tight_layout()
 plt.savefig(out_plot, dpi=300)
+plt.show()
