@@ -114,6 +114,7 @@ for i in range(len(results)):
 ### summarize total results
 total_occurences = sum(item.get('occurences') for item in results)
 total_modified = sum(item.get('modified') for item in results)
+mean_mod_freq = np.mean(item.get('mean_mod_freq') for item in results)
 
 #print total results info 
 print('\n')
@@ -121,6 +122,8 @@ print('found in genome = ',total_occurences)
 print('modified in genome = ', total_modified)
 print('Total percent modfied for all motifs = ',
       round((total_modified / total_occurences) * 100, 2))
+
+print('mean mod_freq for sites within motif = ', mean_mod_freq)
 
 ### output file ###
 if args.out != None:
