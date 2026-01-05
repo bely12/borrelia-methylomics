@@ -28,6 +28,8 @@ parser.add_argument('-ref', default = None, help='reference genome in fasta or m
 parser.add_argument('-all', const=True, nargs='?')
 parser.add_argument('-sample', type=int, help='number of random adenine kmers if selecting all arg', default=None)
 parser.add_argument('-modified', const=True, nargs='?')
+parser.add_argument('-negative', const=True, nargs='?')
+parser.add_argument('-neg_sample', type=int, default=1000, help='number of negative seqs to generate')
 parser.add_argument('-mod_base', default = 'A', help='what modified base ex. A or C')
 
 parser.add_argument('-len', default=11, type=int, help='size of kmer you wish to extract')
@@ -86,6 +88,12 @@ if args.bed != None:
     df = bed[ (bed['mod_freq'] > args.mod_threshold) & (bed['cov'] >= args.depth)]
     recs = df.to_dict('records')
 
+  # get kmers for negative seqs
+  if args.negative == True:
+    df = bed[ (bed['mod_freq'] < args.mod_threshold) & (bed['cov'] >= args.depth)]
+    df = df.sample(n=args.neg_sample).reset_index(drop=True)
+    recs = df.to_dict('records')
+
   # extract 11mers for every adenine 
   kmers = []
   down = math.floor(args.len/2)
@@ -114,8 +122,11 @@ if args.bed != None:
     if args.all != None:
       print('>seq_',k,'\n',seq, sep='', file = open(args.out+'_sampled_kmer_seqs.fasta', "a"))
       k += 1
-    else:
+    if args.modifed != None:
       print('>seq_',k,'\n',seq, sep='', file = open(args.out+'_positive_seqs.fasta', "a"))
+      k += 1
+    if args.negative != None:
+      print('>seq_',k,'\n',seq, sep='', file = open(args.out+'_negative_seqs.fasta', "a"))
       k += 1
 
   if args.controls == True:
