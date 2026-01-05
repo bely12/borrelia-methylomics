@@ -122,7 +122,7 @@ if args.bed != None:
     if args.all != None:
       print('>seq_',k,'\n',seq, sep='', file = open(args.out+'_sampled_kmer_seqs.fasta', "a"))
       k += 1
-    if args.modifed != None:
+    if args.modified != None:
       print('>seq_',k,'\n',seq, sep='', file = open(args.out+'_positive_seqs.fasta', "a"))
       k += 1
     if args.negative != None:
