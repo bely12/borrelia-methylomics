@@ -162,19 +162,27 @@ args = parser.parse_args()
 methylated = load_fasta(args.methylated) # pos seqs
 unmethylated = load_fasta(args.unmethylated) # neg seqs
 
+
 ### MASK A MOTIF ###
+mask_motifs = []
 if args.mask_motif:
-    mask = args.mask_motif.upper()
+    mask_motifs = [m.strip().upper() for m in args.mask_motif.split(",") if m.strip()] #split comma sep list
+
+if mask_motifs:
     kept = []
     for s in methylated:
         found = False
-        for pos in range(len(mask)):
-            if mask[pos] == args.modified_base and motif_matches_masking(mask, pos, s):
-                found = True
+        for mask in mask_motifs:
+            for pos in range(len(mask)):
+                if mask[pos] == args.modified_base and motif_matches_masking(mask, pos, s):
+                    found = True
+                    break
+            if found:
                 break
         if not found:
             kept.append(s)
     methylated = kept
+
 
 ### RUN GENETIC ALGORITHM ###
 results = []
