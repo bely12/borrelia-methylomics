@@ -37,9 +37,25 @@ for i in range(len(ref)):
 
 #prepare bed file and convert to list of row dictionaries 
 bed = pd.read_table(args.bed, sep = '\t', header=None)
-bed[['cov', 'mod_freq', 'N_mod', 'N_can', 'N_other', 'N_del', 'N_fail', 'N_diff', 'N_nocall']] = bed[9].str.split(' ', expand=True)
-bed = bed.rename(columns={0: 'chromosome', 1: 'start', 2: 'end', 3: 'mod', 4: 'score', 5: 'strand'})
-bed = bed.drop(columns=[6,7,8,9])
+#bed[['cov', 'mod_freq', 'N_mod', 'N_can', 'N_other', 'N_del', 'N_fail', 'N_diff', 'N_nocall']] = bed[9].str.split(' ', expand=True)
+#bed = bed.rename(columns={0: 'chromosome', 1: 'start', 2: 'end', 3: 'mod', 4: 'score', 5: 'strand'})
+#bed = bed.drop(columns=[6,7,8,9])
+bed = bed.rename(columns={0: 'chromosome', 
+                          1: 'start', 
+                          2: 'end', 
+                          3: 'mod', 
+                          4: 'score', 
+                          5: 'strand',
+                          9:'cov',
+                          10:'mod_freq',
+                          11:'N_mod',
+                          12:'N_can',
+                          13:'N_other',
+                          14:'N_del',
+                          15:'N_fail',
+                          16:'N_diff',
+                          17:'N_nocall'})
+bed = bed.drop(columns=[6,7,8])
 bed['mod_freq'] = bed['mod_freq'].astype(float)
 bed['cov'] = bed['cov'].astype(int)
 recs = bed.to_dict('records')
